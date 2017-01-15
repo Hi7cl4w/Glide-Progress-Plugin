@@ -1,0 +1,127 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.1"
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    lintOptions {
+        lintConfig file('lint.xml')
+    }
+}
+
+group = 'com.manuknarayanan'
+version = '0.0.4'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.squareup.okhttp3:okhttp:3.3.1'
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'com.github.bumptech.glide:okhttp3-integration:1.4.0@aar'
+    testCompile 'junit:junit:4.12'
+}
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+/*task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}*/
+
+task javadoc(type: Javadoc) {
+    failOnError false
+    source = android.sourceSets.main.java.sourceFiles
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    classpath += configurations.compile
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+
+//tasks.withType(Javadoc).all { enabled = false }
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            name 'Glide Progress Plugin'
+            description 'A library to display Glide ImageView Progress'
+            url 'https://github.com/manukn/Glide-Progress-Plugin'
+            inceptionYear '2017'
+            packaging 'aar'
+            groupId 'com.manuknarayanan'
+            artifactId 'glideprogressplugin'
+            version '0.0.4'
+
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0\''
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                }
+            }
+            scm {
+                connection 'https://github.com/manukn/Glide-Progress-Plugin.git'
+                url 'https://github.com/manukn/Glide-Progress-Plugin'
+
+            }
+            developers {
+                developer {
+                    id = 'manukn'
+                    name 'Manu K'
+                }
+            }
+        }
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_API_KEY')
+    configurations = ['archives']
+    override = true
+    publish = true
+    pkg {
+        repo = 'maven'
+        name = 'GlideProgressPlugin'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/manukn/Glide-Progress-Plugin.git'
+        publish = true
+        version {
+            name = '0.0.4'
+            desc = 'Glide Progress Plugin'
+            released = new Date()
+            vcsTag = '0.0.4'
+            attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
+        }
+    }
+}
+
